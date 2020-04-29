@@ -7,13 +7,16 @@ from tkinter import filedialog
  
 from tkinter import ttk
 from ttkthemes import themed_tk as tk
- 
 from mutagen.mp3 import MP3
 from pygame import mixer
  
+# Root Window contains Status Bar, Left Frame and Right Frame
+# LeftFrame contains listbox (playlist)
+# RightFrame contains all the control buttons like play, pause, stop, rewind, mute and volume control
+ 
+ 
 root = tk.ThemedTk()
-root.get_themes()                 # Returns a list of all themes that can be set
-root.set_theme("radiance")         # Sets an available theme
+root.set_theme("arc")         
  
 statusbar = ttk.Label(root, text="Welcome to TuneMate", relief=SUNKEN, anchor=W, font='Times 10 italic')
 statusbar.pack(side=BOTTOM, fill=X)
@@ -25,19 +28,20 @@ root.config(menu=menubar)
 # Create the submenu
 subMenu = Menu(menubar, tearoff=0)
  
-playlist = []
+playlist = []   # contains the full path + filename
  
-# playlist - contains the full path + filename
 # playlistbox - contains just the filename
 # Fullpath + filename is required to play the music inside start_music load function
  
+ 
+#function to get the song from computer - It takes the path
 def browse_file():
     global filename_path
     filename_path = filedialog.askopenfilename()
     add_a_song(filename_path)
     mixer.music.queue(filename_path)
  
- 
+#function to add song into the list 
 def add_a_song(filename):
     filename = os.path.basename(filename)
     index = 0
@@ -45,14 +49,13 @@ def add_a_song(filename):
     playlist.insert(index, filename_path)
     index += 1
  
- 
 menubar.add_cascade(label="File", menu=subMenu)
 subMenu.add_command(label="Open", command=browse_file)
 subMenu.add_command(label="Exit", command=root.destroy)
  
- 
+#function to display information about uus
 def about_us():
-    tkinter.messagebox.showinfo('About TuneMate', 'This is a music player build using Python Tkinter')
+    tkinter.messagebox.showinfo('About TuneMate', 'This is a music player build using Python Tkinter and Pygame')
  
  
 subMenu = Menu(menubar, tearoff=0)
@@ -64,10 +67,8 @@ mixer.init()  # initializing the mixer
 root.title("TuneMate")
 root.iconbitmap(r'images/melody.ico')
  
-# Root Window - StatusBar, LeftFrame, RightFrame
-# LeftFrame - The listbox (playlist)
-# RightFrame - TopFrame,MiddleFrame and the BottomFrame
  
+#creating the left frame
 leftframe = Frame(root)
 leftframe.pack(side=LEFT, padx=10, pady=10)
  
@@ -78,6 +79,7 @@ addBtn = ttk.Button(leftframe, text="+ Add Song", command=browse_file)
 addBtn.pack(side=LEFT, padx=10, pady=10)
  
  
+#deleting the song from your listbox (playlist)
 def delete_a_song():
     selected_song = playlistbox.curselection()
     selected_song = int(selected_song[0])
@@ -100,6 +102,7 @@ lengthlabel.pack(pady=10)
 currenttimelabel = ttk.Label(topframe, text='Current Time : --:--', relief=GROOVE)
 currenttimelabel.pack()
  
+#function to start the music
 def start_music():
     global paused
  
@@ -122,6 +125,7 @@ def start_music():
             tkinter.messagebox.showerror('File not found', 'TuneMate could not find the file. Please check again.')
  
             
+#function to view details of currently playing song
 def view_details(play_song):
     file_data = os.path.splitext(play_song)
  
@@ -145,7 +149,7 @@ def view_details(play_song):
  
 def start_count(t):
     global paused
-    # mixer.music.get_busy(): - Returns FALSE when we press the stop button (music stop playing)
+    # mixer.music.get_busy(): - Returns FALSE when we press the stop button 
     # Continue - Ignores all of the statements below it. We check if music is paused or not.
     current_time = 0
     while current_time <= t and mixer.music.get_busy():
@@ -161,8 +165,7 @@ def start_count(t):
             current_time += 1
  
  
- 
- 
+#function to stop the music
 def stop_music():
     mixer.music.stop()
     statusbar['text'] = "Music Stopped"
@@ -170,11 +173,13 @@ def stop_music():
  
 paused = FALSE
  
+#function to rewinf the music
 def rewind_music():
     start_music()
     statusbar['text'] = "Music Rewinded"
  
  
+#function to pause the music
 def pause_music():
     global paused
     paused = TRUE
@@ -182,15 +187,15 @@ def pause_music():
     statusbar['text'] = "Music Paused"
  
  
+#function to set the volume - value of volume ranges from 0 to 1
 def set_volume(val):
     volume = float(val) / 100
     mixer.music.set_volume(volume)
-    # set_volume of mixer takes value only from 0 to 1. Example - 0, 0.1,0.55,0.54.0.99,1
  
  
 muted = FALSE
  
- 
+#function to mute volume
 def mute_music():
     global muted
     if muted:  # Unmute the music
@@ -208,7 +213,11 @@ def mute_music():
 middleframe = Frame(rightframe)
 middleframe.pack(pady=30, padx=30)
  
-playPhoto = PhotoImage(file='images/play.png')
+#Here we are adding images to buttons to make them look good
+ 
+#Top frame of right side containing play, pause and stop controls
+ 
+playPhoto = PhotoImage(file='images/play.png') 
 playBtn = ttk.Button(middleframe, image=playPhoto, command=start_music)
 playBtn.grid(row=0, column=0, padx=10)
  
@@ -220,7 +229,7 @@ pausePhoto = PhotoImage(file='images/pause.png')
 pauseBtn = ttk.Button(middleframe, image=pausePhoto, command=pause_music)
 pauseBtn.grid(row=0, column=2, padx=10)
  
-# Bottom Frame for volume, rewind, mute etc.
+# Bottom Frame for volume, rewind, mute controls
  
 bottomframe = Frame(rightframe)
 bottomframe.pack()
@@ -240,10 +249,11 @@ mixer.music.set_volume(0.7)
 scale.grid(row=0, column=2, pady=15, padx=30)
  
  
+#function called when we close the window.It stops the music and closes the window.
 def on_closing():
     stop_music()
     root.destroy()
  
  
 root.protocol("WM_DELETE_WINDOW", on_closing)
-root.mainloop()
+root.mainloop() #Making the application run
