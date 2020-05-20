@@ -173,7 +173,7 @@ def stop_music():
  
 paused = FALSE
  
-#function to rewinf the music
+#function to rewind the music
 def rewind_music():
     start_music()
     statusbar['text'] = "Music Rewinded"
